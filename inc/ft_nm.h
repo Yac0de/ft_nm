@@ -1,6 +1,7 @@
 #pragma once
 
 /* ========== External Libs ========== */
+
 # include <stdio.h>
 # include <fcntl.h>
 # include <unistd.h>
@@ -9,7 +10,14 @@
 # include <elf.h>
 
 /* ========== Libft perso ========== */
+
 # include "../libft/inc/libft.h"
+
+/* ========== Symbol parsing status codes ========== */
+
+#define SYMBOLS_OK     1
+#define NO_SYMBOLS     0
+#define INVALID_ELF   -1
 
 /* ========== Structures ========== */
 

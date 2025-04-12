@@ -4,6 +4,9 @@
 // Returns a pointer to the matching section, or NULL if not found.
 Elf64_Shdr *find_section_by_name_64(t_section_ctx_64 *ctx, const char *name)
 {
+	if (!ctx->shstrtab)
+		return NULL;
+
 	for (int i = 0; i < ctx->ehdr->e_shnum; i++)
 	{
 		const char *sname = ctx->shstrtab + ctx->shdr[i].sh_name;
