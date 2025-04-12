@@ -25,25 +25,38 @@ static t_symbol_32 *filter_and_build_symbols_32(t_symbol_build_ctx_32 *ctx, int 
 	return list;
 }
 
-// Collects and prepares symbols from an ELF32 file.
-// Converts raw ELF symbols into an array of t_symbol_32.
-// Returns NULL on error, or the list of symbols with count in out_count.
+// Extracts and prepares the symbol list from the ELF32 symbol table.
+// Returns NULL if the symbol table is invalid or cannot be read safely.
+// If successful, returns a filtered and sorted list of t_symbol_32 symbols.
 t_symbol_32 *collect_symbols_32(t_symbol_ctx_32 *ctx, int *out_count)
 {
+	// Defensive checks on context and inputs
 	if (!ctx || !ctx->map || !ctx->symtab || !ctx->strtab || !out_count)
 		return NULL;
 
-	// Validate that the symbol table has a sane size
-	if (ctx->symtab->sh_size % sizeof(Elf32_Sym) != 0)
-		return (ft_putstr_fd("Error: corrupted symtab size\n", 2), NULL);
+	// Shortcut to ELF header and file size
+	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)ctx->map;
+	size_t file_size = ((t_file *)ctx->map)->size; // This cast is valid only if ctx->map == file->map
 
-	// Build a context object to pass symbol data to the builder function
+	// Validate that the .symtab section does not overflow the file
+	Elf32_Off sym_offset = ctx->symtab->sh_offset;
+	Elf32_Xword sym_size = ctx->symtab->sh_size;
+
+	if (sym_offset + sym_size > file_size)
+		return NULL;
+
+	// Validate that .symtab size is a multiple of symbol struct size
+	if (sym_size % sizeof(Elf32_Sym) != 0)
+		return NULL;
+
+	// Prepare a context for building and filtering the final symbol list
 	t_symbol_build_ctx_32 bctx = {
-		.symbols = (Elf32_Sym *)(ctx->map + ctx->symtab->sh_offset),
-		.symbol_count = ctx->symtab->sh_size / sizeof(Elf32_Sym),
+		.symbols = (Elf32_Sym *)(ctx->map + sym_offset),
+		.symbol_count = sym_size / sizeof(Elf32_Sym),
 		.strtab_data = (char *)(ctx->map + ctx->strtab->sh_offset),
-		.sections = (Elf32_Shdr *)(ctx->map + ((Elf32_Ehdr *)ctx->map)->e_shoff)
+		.sections = (Elf32_Shdr *)(ctx->map + ehdr->e_shoff)
 	};
 
+	// Build and return the list of symbols
 	return filter_and_build_symbols_32(&bctx, out_count);
 }

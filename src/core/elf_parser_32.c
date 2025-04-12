@@ -9,16 +9,32 @@ static int	print_format_error(const char *filename)
 	return INVALID_ELF;
 }
 
-// Verifies that the section header table is within the file bounds.
+// Validates that the section header table fits within the file.
+// Also scans all sections to detect if any extend past EOF,
+// and prints a warning matching the behavior of `nm`.
+// Returns 1 if section headers are accessible, 0 if the file is too small or corrupted.
 static int	validate_section_headers(t_file *file, Elf32_Ehdr *ehdr)
 {
-	size_t shdr_size;
+	size_t shdr_size = ehdr->e_shnum * sizeof(Elf32_Shdr);
 
-	if (ehdr->e_shoff > file->size)
+	if (ehdr->e_shoff > file->size || ehdr->e_shoff + shdr_size > file->size)
 		return 0;
-	shdr_size = ehdr->e_shnum * sizeof(Elf32_Shdr);
-	if (ehdr->e_shoff + shdr_size > file->size)
-		return 0;
+
+	Elf32_Shdr *shdr = (Elf32_Shdr *)(file->map + ehdr->e_shoff);
+
+	// Check if at least one section extends past the end of the file
+	int section_out_of_bounds = 0;
+	for (int i = 0; i < ehdr->e_shnum; i++)
+		if (shdr[i].sh_offset + shdr[i].sh_size > file->size)
+			section_out_of_bounds = 1;
+
+	if (section_out_of_bounds)
+	{
+		ft_putstr_fd("nm: warning: ", 2);
+		ft_putstr_fd((char *)file->name, 2);
+		ft_putstr_fd(" has a section extending past end of file\n", 2);
+	}
+
 	return 1;
 }
 
