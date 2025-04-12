@@ -1,15 +1,64 @@
 #include "../inc/ft_nm.h"
 
-// Extracts and builds the context needed to read ELF32 symbols.
-// Returns 1 if both .symtab/.strtab or .dynsym/.dynstr were found, 0 otherwise.
-static int get_symbol_ctx_32(void *map, t_symbol_ctx_32 *ctx)
-{
-	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)map;
-	Elf32_Shdr *shdr = (Elf32_Shdr *)(map + ehdr->e_shoff);
-	Elf32_Shdr *shstr = &shdr[ehdr->e_shstrndx];
-	char *shstrtab = (char *)(map + shstr->sh_offset);
+#define SYMBOLS_OK     1
+#define NO_SYMBOLS     0
+#define INVALID_ELF   -1
 
-	// Create a helper context to pass section info to the lookup function
+// Prints a standardized error message for invalid ELF files.
+static int	print_format_error(const char *filename)
+{
+	ft_putstr_fd("nm: ", 2);
+	ft_putstr_fd((char *)filename, 2);
+	ft_putstr_fd(": file format not recognized\n", 2);
+	return INVALID_ELF;
+}
+
+// Checks if the section headers table is valid and within bounds.
+static int	validate_section_headers(t_file *file, Elf32_Ehdr *ehdr)
+{
+	size_t shdr_size;
+
+	if (ehdr->e_shoff > file->size)
+		return 0;
+	shdr_size = ehdr->e_shnum * sizeof(Elf32_Shdr);
+	if (ehdr->e_shoff + shdr_size > file->size)
+		return 0;
+	if (ehdr->e_shstrndx >= ehdr->e_shnum)
+		return 0;
+	return 1;
+}
+
+// Checks if the section header string table fits within the file.
+static int	validate_shstrtab(t_file *file, Elf32_Shdr *shstr)
+{
+	if (shstr->sh_offset + shstr->sh_size > file->size)
+		return 0;
+	return 1;
+}
+
+// Extracts and builds the context needed to read ELF32 symbols.
+// Returns:
+// - SYMBOLS_OK     → valid ELF + symbols found
+// - NO_SYMBOLS     → valid ELF but no .symtab/.dynsym
+// - INVALID_ELF    → invalid ELF (already printed error)
+static int	get_symbol_ctx_32(t_file *file, t_symbol_ctx_32 *ctx)
+{
+	if (file->size < sizeof(Elf32_Ehdr))
+		return print_format_error(file->name);
+
+	Elf32_Ehdr *ehdr = (Elf32_Ehdr *)file->map;
+
+	if (!validate_section_headers(file, ehdr))
+		return print_format_error(file->name);
+
+	Elf32_Shdr *shdr = (Elf32_Shdr *)(file->map + ehdr->e_shoff);
+	Elf32_Shdr *shstr = &shdr[ehdr->e_shstrndx];
+
+	if (!validate_shstrtab(file, shstr))
+		return print_format_error(file->name);
+
+	char *shstrtab = (char *)(file->map + shstr->sh_offset);
+
 	t_section_ctx_32 sctx = {
 		.ehdr = ehdr,
 		.shdr = shdr,
@@ -19,15 +68,13 @@ static int get_symbol_ctx_32(void *map, t_symbol_ctx_32 *ctx)
 	Elf32_Shdr *symtab;
 	Elf32_Shdr *strtab;
 
-	// Try to find both symbol and string tables
 	if (!find_sym_and_str_tab_32(&sctx, &symtab, &strtab))
-		return 0;
+		return NO_SYMBOLS;
 
-	// Store in the final symbol context
-	ctx->map = map;
+	ctx->map = file->map;
 	ctx->symtab = symtab;
 	ctx->strtab = strtab;
-	return 1;
+	return SYMBOLS_OK;
 }
 
 // Parse and display all ELF32 symbols from the mapped file.
@@ -35,8 +82,12 @@ static int get_symbol_ctx_32(void *map, t_symbol_ctx_32 *ctx)
 int	parse_and_display_elf32_symbols(t_file *file)
 {
 	t_symbol_ctx_32 ctx;
+	int result = get_symbol_ctx_32(file, &ctx);
 
-	if (!get_symbol_ctx_32(file, &ctx))
+	if (result == INVALID_ELF)
+		return 1;
+
+	if (result == NO_SYMBOLS)
 	{
 		ft_putstr_fd("nm: ", 2);
 		ft_putstr_fd((char *)file->name, 2);
