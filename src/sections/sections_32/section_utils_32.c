@@ -13,20 +13,12 @@ Elf32_Shdr *find_section_by_name_32(t_section_ctx_32 *ctx, const char *name)
 	return NULL;
 }
 
-// Tries to find the pair of symbol and string tables (.symtab/.strtab or .dynsym/.dynstr).
+// Tries to find the pair of symbol and string tables (.symtab/.strtab).
 // Returns 1 if both are found, 0 otherwise.
 int find_sym_and_str_tab_32(t_section_ctx_32 *ctx, Elf32_Shdr **symtab, Elf32_Shdr **strtab)
 {
-	// First try regular symbol table
 	*symtab = find_section_by_name_32(ctx, ".symtab");
 	*strtab = find_section_by_name_32(ctx, ".strtab");
-
-	if (*symtab && *strtab)
-		return 1;
-
-	// Fallback to dynamic symbol table
-	*symtab = find_section_by_name_32(ctx, ".dynsym");
-	*strtab = find_section_by_name_32(ctx, ".dynstr");
 
 	return (*symtab && *strtab);
 }

@@ -84,9 +84,9 @@ void	*map_file(int fd, size_t size);
 int		unmap_file(void *map, size_t size);
 
 // handle_elf_file.c
-int		handle_elf_file(void *map);
-int		parse_and_display_elf64_symbols(void *map);
-int		parse_and_display_elf32_symbols(void *map);
+int		handle_elf_file(void *map, const char *filename);
+int		parse_and_display_elf64_symbols(void *map, const char *filename);
+int		parse_and_display_elf32_symbols(void *map, const char *filename);
 
 
 /* ========== Section parsing ========== */

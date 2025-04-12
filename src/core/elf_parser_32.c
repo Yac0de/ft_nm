@@ -31,13 +31,18 @@ static int get_symbol_ctx_32(void *map, t_symbol_ctx_32 *ctx)
 }
 
 // Parse and display all ELF32 symbols from the mapped file.
-// Returns 0 on success, 1 on error (e.g. no symbol table found).
-int parse_and_display_elf32_symbols(void *map)
+// Returns 0 on success, 1 on error (e.g. nm: <ELF>: no symbols).
+int	parse_and_display_elf32_symbols(void *map, const char *filename)
 {
 	t_symbol_ctx_32 ctx;
 
 	if (!get_symbol_ctx_32(map, &ctx))
-		return (ft_putstr_fd("Error: symtab or strtab not found (32)\n", 2), 1);
+	{
+		ft_putstr_fd("nm: ", 2);
+		ft_putstr_fd((char *)filename, 2);
+		ft_putstr_fd(": no symbols\n", 2);
+		return 1;
+	}
 
 	return read_symbols_32(&ctx);
 }

@@ -49,7 +49,7 @@ int	main(int argc, char **argv)
 		return (unmap_file(map, size), ft_putstr_fd("Not an ELF file\n", 2), 1);
 
 	// Parse and display symbols depending on ELF class (32/64)
-	int status = handle_elf_file(map);
+	int status = handle_elf_file(map, argv[1]);
 
 	// Always unmap the file before exiting
 	unmap_file(map, size);
