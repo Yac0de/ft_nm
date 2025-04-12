@@ -31,7 +31,7 @@ void *map_file(int fd, size_t size)
 
 // Unmaps a previously mapped file region.
 // Returns 0 on success, or -1 on failure.
-int unmap_file(void *map, size_t size)
+int unmap_file(t_file *file)
 {
-	return munmap(map, size);
+	return munmap(file->map, file->size);
 }

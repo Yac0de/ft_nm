@@ -32,14 +32,14 @@ static int	get_symbol_ctx_64(void *map, t_symbol_ctx_64 *ctx)
 
 // Parse and display all ELF64 symbols from the mapped file.
 // Returns 0 on success, 1 on error (e.g. nm: <ELF>: no symbols).
-int	parse_and_display_elf64_symbols(void *map, const char *filename)
+int	parse_and_display_elf64_symbols(t_file *file)
 {
 	t_symbol_ctx_64 ctx;
 
-	if (!get_symbol_ctx_64(map, &ctx))
+	if (!get_symbol_ctx_64(file->map, &ctx))
 	{
 		ft_putstr_fd("nm: ", 2);
-		ft_putstr_fd((char *)filename, 2);
+		ft_putstr_fd((char *)file->name, 2);
 		ft_putstr_fd(": no symbols\n", 2);
 		return 1;
 	}

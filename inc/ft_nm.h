@@ -13,6 +13,12 @@
 
 /* ========== Structures ========== */
 
+typedef struct s_file {
+	void		*map;
+	size_t		size;
+	const char	*name;
+}	t_file;
+
 // ELF64
 typedef struct s_section_ctx_64 {
 	Elf64_Ehdr *ehdr;
@@ -81,12 +87,12 @@ int		is_valid_elf(void *map);
 int		open_file(const char *path);
 int		get_file_stat(int fd, struct stat *st);
 void	*map_file(int fd, size_t size);
-int		unmap_file(void *map, size_t size);
+int		unmap_file(t_file *file);
 
 // handle_elf_file.c
-int		handle_elf_file(void *map, const char *filename);
-int		parse_and_display_elf64_symbols(void *map, const char *filename);
-int		parse_and_display_elf32_symbols(void *map, const char *filename);
+int		handle_elf_file(t_file *file);
+int		parse_and_display_elf64_symbols(t_file *file);
+int		parse_and_display_elf32_symbols(t_file *file);
 
 
 /* ========== Section parsing ========== */
