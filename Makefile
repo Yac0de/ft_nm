@@ -82,7 +82,7 @@ fclean: clean
 re: fclean all
 
 # Test rules
-test:
+test: all
 	@echo "\n${YELLOW}Running test suite...${NC}\n"
 	@cd $(TEST_DIR) && ./run_tests.sh
 
