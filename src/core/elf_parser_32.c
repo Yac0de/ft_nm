@@ -79,6 +79,10 @@ static int	get_symbol_ctx_32(t_file *file, t_symbol_ctx_32 *ctx)
 		ft_putstr_fd(" has a section extending past end of file\n", 2);
 		return NO_SYMBOLS;
 	}
+
+	if (symtab->sh_entsize == 0)
+		return print_format_error(file->name);
+
 	ctx->map = file->map;
 	ctx->file_size = file->size;
 	ctx->symtab = symtab;

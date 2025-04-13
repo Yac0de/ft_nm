@@ -16,5 +16,9 @@ int	handle_elf_file(t_file *file)
 	else if (class == ELFCLASS32)
 		return parse_and_display_elf32_symbols(file);
 	else
-		return (ft_putstr_fd("Error: Unknown ELF class\n", 2), 1);
+	{
+		ft_putstr_fd("nm: ", 2);
+		ft_putstr_fd((char *)file->name, 2);
+		return(ft_putstr_fd(": no symbols\n", 2), 1);
+	}
 }
