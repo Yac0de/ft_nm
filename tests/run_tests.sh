@@ -12,6 +12,7 @@ VERBOSE=false  # ← set to true to see all messages during tests
 
 mkdir -p "$OBJ_DIR" "$EXP_DIR" "$ACT_DIR"
 rm -f "$ACT_DIR"/*.txt
+git push --force
 
 GREEN="\033[0;32m"
 RED="\033[0;31m"
@@ -38,10 +39,14 @@ for src in "$SRC_DIR"/*; do
         fi
 
     elif [ "$ext" = "txt" ]; then
-        if "$FT_NM" "$src" 2>&1 | grep -q "Not an ELF file"; then
+        "$NM" "$src" 2>&1 | tee "$EXP_DIR/$base.txt" > /dev/null
+        "$FT_NM" "$src" 2>&1 | tee "$ACT_DIR/$base.txt" > /dev/null
+
+        if diff -u "$EXP_DIR/$base.txt" "$ACT_DIR/$base.txt" > /dev/null; then
             echo -e "$GREEN✔ $base (non-ELF)$NC"
         else
             echo -e "$RED✘ $base (non-ELF)$NC"
+            diff -u "$EXP_DIR/$base.txt" "$ACT_DIR/$base.txt"
         fi
     fi
 done

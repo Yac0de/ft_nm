@@ -9,33 +9,12 @@ static int	print_format_error(const char *filename)
 	return INVALID_ELF;
 }
 
-// Validates that the section header table fits within the file.
-// Also scans all sections to detect if any extend past EOF,
-// and prints a warning matching the behavior of `nm`.
-// Returns 1 if section headers are accessible, 0 if the file is too small or corrupted.
-static int	validate_section_headers(t_file *file, Elf64_Ehdr *ehdr)
+// Checks if the section header table fits within the mapped file.
+static int	is_section_header_table_within_bounds(t_file *file, Elf64_Ehdr *ehdr)
 {
 	size_t shdr_size = ehdr->e_shnum * sizeof(Elf64_Shdr);
 
-	if (ehdr->e_shoff > file->size || ehdr->e_shoff + shdr_size > file->size)
-		return 0;
-
-	Elf64_Shdr *shdr = (Elf64_Shdr *)(file->map + ehdr->e_shoff);
-
-	// Check if at least one section extends past the end of the file
-	int section_out_of_bounds = 0;
-	for (int i = 0; i < ehdr->e_shnum; i++)
-		if (shdr[i].sh_offset + shdr[i].sh_size > file->size)
-			section_out_of_bounds = 1;
-
-	if (section_out_of_bounds)
-	{
-		ft_putstr_fd("nm: warning: ", 2);
-		ft_putstr_fd((char *)file->name, 2);
-		ft_putstr_fd(" has a section extending past end of file\n", 2);
-	}
-
-	return 1;
+	return (ehdr->e_shoff <= file->size && ehdr->e_shoff + shdr_size <= file->size);
 }
 
 // Verifies that the section header string table fits within the file.
@@ -74,7 +53,7 @@ static int	get_symbol_ctx_64(t_file *file, t_symbol_ctx_64 *ctx)
 
 	Elf64_Ehdr *ehdr = (Elf64_Ehdr *)file->map;
 
-	if (!validate_section_headers(file, ehdr))
+	if (!is_section_header_table_within_bounds(file, ehdr))
 		return print_format_error(file->name);
 
 	Elf64_Shdr *shdr = (Elf64_Shdr *)(file->map + ehdr->e_shoff);
@@ -92,6 +71,14 @@ static int	get_symbol_ctx_64(t_file *file, t_symbol_ctx_64 *ctx)
 	if (!find_sym_and_str_tab_64(&sctx, &symtab, &strtab))
 		return NO_SYMBOLS;
 
+	if ((symtab->sh_offset + symtab->sh_size > file->size)
+		|| (strtab->sh_offset + strtab->sh_size > file->size))
+	{
+		ft_putstr_fd("nm: warning: ", 2);
+		ft_putstr_fd((char *)file->name, 2);
+		ft_putstr_fd(" has a section extending past end of file\n", 2);
+		return NO_SYMBOLS;
+	}
 	ctx->map = file->map;
 	ctx->file_size = file->size;
 	ctx->symtab = symtab;
