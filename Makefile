@@ -90,6 +90,6 @@ test_clean:
 	@echo "${RED}Cleaning test outputs${NC}"
 	@rm -rf $(TEST_OBJ_DIR) $(TEST_EXP_DIR) $(TEST_ACT_DIR)
 
-test_re: tests_clean test
+test_re: test_clean test
 
 .PHONY: all clean fclean re test test_clean test_re

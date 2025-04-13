@@ -36,13 +36,12 @@ t_symbol_64 *collect_symbols_64(t_symbol_ctx_64 *ctx, int *out_count)
 
 	// Shortcut to ELF header and file size
 	Elf64_Ehdr *ehdr = (Elf64_Ehdr *)ctx->map;
-	size_t file_size = ((t_file *)ctx->map)->size; // This cast is valid only if ctx->map == file->map
 
 	// Validate that the .symtab section does not overflow the file
 	Elf64_Off sym_offset = ctx->symtab->sh_offset;
 	Elf64_Xword sym_size = ctx->symtab->sh_size;
 
-	if (sym_offset + sym_size > file_size)
+	if (sym_offset + sym_size > ctx->file_size)
 		return NULL;
 
 	// Validate that .symtab size is a multiple of symbol struct size

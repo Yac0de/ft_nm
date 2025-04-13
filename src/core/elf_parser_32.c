@@ -93,27 +93,34 @@ static int	get_symbol_ctx_32(t_file *file, t_symbol_ctx_32 *ctx)
 		return NO_SYMBOLS;
 
 	ctx->map = file->map;
+	ctx->file_size = file->size;
 	ctx->symtab = symtab;
 	ctx->strtab = strtab;
 	return SYMBOLS_OK;
 }
 
-// High-level entrypoint to parse and display ELF32 symbols.
-// Handles all error types and prints appropriate messages matching `nm`.
+// Top-level dispatcher for parsing and displaying ELF32 symbols.
+// Ensures consistent error handling and outputs messages that exactly match `nm`.
+// Returns 0 on success, 1 on any error or if no symbols are found.
 int	parse_and_display_elf32_symbols(t_file *file)
 {
 	t_symbol_ctx_32 ctx;
-	int result = get_symbol_ctx_32(file, &ctx);
+	int result;
 
+	result = get_symbol_ctx_32(file, &ctx);
 	if (result == INVALID_ELF)
 		return 1;
+
+	if (result == SYMBOLS_OK)
+		return read_symbols_32(&ctx);
 
 	if (result == NO_SYMBOLS)
 	{
 		ft_putstr_fd("nm: ", 2);
 		ft_putstr_fd((char *)file->name, 2);
-		return(ft_putstr_fd(": no symbols\n", 2), 1);
+		ft_putstr_fd(": no symbols\n", 2);
+		return 1;
 	}
 
-	return read_symbols_32(&ctx);
+	return 0;
 }

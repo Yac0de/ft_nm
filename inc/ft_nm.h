@@ -41,10 +41,11 @@ typedef struct s_symbol_64 {
 }	t_symbol_64;
 
 typedef struct s_symbol_ctx_64 {
-	void		*map;
-	Elf64_Shdr	*symtab;
-	Elf64_Shdr	*strtab;
-}	t_symbol_ctx_64;
+	void        *map;
+	size_t      file_size;
+	Elf64_Shdr  *symtab;
+	Elf64_Shdr  *strtab;
+} t_symbol_ctx_64;
 
 typedef struct s_symbol_build_ctx_64
 {
@@ -71,6 +72,7 @@ typedef struct s_symbol_32 {
 
 typedef struct s_symbol_ctx_32 {
 	void		*map;
+	size_t      file_size;
 	Elf32_Shdr	*symtab;
 	Elf32_Shdr	*strtab;
 }	t_symbol_ctx_32;
@@ -126,7 +128,7 @@ int find_sym_and_str_tab_32(t_section_ctx_32 *ctx, Elf32_Shdr **symtab, Elf32_Sh
 int		read_symbols_64(t_symbol_ctx_64 *ctx);
 
 // collect_symbols_64.c
-t_symbol_64	*collect_symbols_64(t_symbol_ctx_64 *ctx, int *out_count);
+t_symbol_64	*collect_symbols_64(t_symbol_ctx_64 *ctx , int *out_count);
 
 // symbol_builder_64.c
 t_symbol_64	build_symbol_64(Elf64_Sym sym, char *strtab, Elf64_Shdr *sections);

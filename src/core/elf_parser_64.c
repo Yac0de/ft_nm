@@ -93,6 +93,7 @@ static int	get_symbol_ctx_64(t_file *file, t_symbol_ctx_64 *ctx)
 		return NO_SYMBOLS;
 
 	ctx->map = file->map;
+	ctx->file_size = file->size;
 	ctx->symtab = symtab;
 	ctx->strtab = strtab;
 	return SYMBOLS_OK;
@@ -111,7 +112,7 @@ int	parse_and_display_elf64_symbols(t_file *file)
 		return 1;
 
 	if (result == SYMBOLS_OK)
-		result = read_symbols_64(&ctx);
+		return read_symbols_64(&ctx);
 
 	if (result == NO_SYMBOLS)
 	{
