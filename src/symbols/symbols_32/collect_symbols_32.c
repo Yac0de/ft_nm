@@ -16,7 +16,7 @@ static t_symbol_32 *filter_and_build_symbols_32(t_symbol_build_ctx_32 *ctx, int 
 	for (int i = 0; i < ctx->symbol_count; i++)
 	{
 		// Filter out anonymous or unprintable symbols
-		if (!skip_symbol_32(&ctx->symbols[i]) &&
+		if (!skip_symbol_32(&ctx->symbols[i], ctx->strtab_data) &&
 			ctx->strtab_data[ctx->symbols[i].st_name] != '\0')
 				list[j++] = build_symbol_32(ctx->symbols[i], ctx->strtab_data, ctx->sections);
 	}

@@ -1,54 +1,49 @@
 #include "../../../inc/ft_nm.h"
 
-// Returns true if the section matches a BSS segment (uninitialized data)
-static int is_bss(Elf32_Shdr *s)
-{
-	return (s->sh_type == SHT_NOBITS &&
-			(s->sh_flags & SHF_ALLOC) &&
-			(s->sh_flags & SHF_WRITE));
-}
-
-// Returns true if the section is executable code (text section)
-static int is_text(Elf32_Shdr *s)
-{
-	return (s->sh_type == SHT_PROGBITS &&
-			(s->sh_flags & SHF_ALLOC) &&
-			(s->sh_flags & SHF_EXECINSTR));
-}
-
-// Returns true if the section is writable data
-static int is_data(Elf32_Shdr *s)
-{
-	return (s->sh_type == SHT_PROGBITS &&
-			(s->sh_flags & SHF_ALLOC) &&
-			(s->sh_flags & SHF_WRITE));
-}
-
 // Maps an ELF32 symbol to its nm-style letter representation.
-// Handles weak, undefined, BSS, text, data, and unknown types.
+// Determines the letter based on section type, flags, binding (local/global),
+// and handles special sections like .bss, .data, .rodata, .text, etc.
 char get_symbol_letter_32(Elf32_Sym *sym, Elf32_Shdr *sections)
 {
 	if (!sym || !sections)
 		return '?';
 
-	// Weak symbols: 'w' if undefined, 'W' if defined
-	if (ELF32_ST_BIND(sym->st_info) == STB_WEAK)
-		return (sym->st_shndx == SHN_UNDEF ? 'w' : 'W');
+	uint8_t bind = ELF32_ST_BIND(sym->st_info);
+	// uint8_t type = ELF32_ST_TYPE(sym->st_info);
+	Elf32_Half shndx = sym->st_shndx;
 
-	// Undefined symbol: 'U'
-	if (sym->st_shndx == SHN_UNDEF)
+	if (bind == STB_WEAK)
+		return (shndx == SHN_UNDEF ? 'w' : 'W');
+
+	if (shndx == SHN_UNDEF)
 		return 'U';
-
-	// Reserved/unsupported section index: mark as unknown
-	if (sym->st_shndx >= SHN_LORESERVE)
+	if (shndx == SHN_ABS)
+		return 'A';
+	if (shndx == SHN_COMMON)
+		return 'C';
+	if (shndx >= SHN_LORESERVE)
 		return '?';
 
-	Elf32_Shdr section = sections[sym->st_shndx];
+	Elf32_Shdr section = sections[shndx];
+	uint32_t flags = section.sh_flags;
+	uint32_t shtype = section.sh_type;
 
-	if (is_bss(&section)) return 'B';
-	if (is_text(&section)) return 'T';
-	if (is_data(&section)) return 'D';
+	char letter = '?';
 
-	// If no match, return '?'
-	return '?';
+	if (shtype == SHT_NOBITS && (flags & SHF_ALLOC) && (flags & SHF_WRITE))
+		letter = 'B'; // .bss
+	else if ((flags & SHF_ALLOC) && (flags & SHF_EXECINSTR))
+		letter = 'T'; // .text
+	else if ((flags & SHF_ALLOC) && (flags & SHF_WRITE))
+		letter = 'D'; // .data
+	else if ((flags & SHF_ALLOC) && !(flags & SHF_WRITE))
+		letter = 'R'; // .rodata
+	else if (shtype == SHT_DYNAMIC)
+		letter = 'D';
+
+	// Local symbols use lowercase
+	if (bind == STB_LOCAL && letter != '?')
+		letter += 32;
+
+	return letter;
 }

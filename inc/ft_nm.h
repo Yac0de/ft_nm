@@ -137,7 +137,7 @@ t_symbol_64	build_symbol_64(Elf64_Sym sym, char *strtab, Elf64_Shdr *sections);
 int		sort_symbols_64(t_symbol_64 *symbols, int count);
 
 // skip_symbol_64.c
-int			skip_symbol_64(Elf64_Sym *sym);
+int			skip_symbol_64(Elf64_Sym *sym, const char *strtab);
 
 // get_symbol_letter_64.c
 char		get_symbol_letter_64(Elf64_Sym *sym, Elf64_Shdr *sections);
@@ -161,7 +161,7 @@ t_symbol_32	build_symbol_32(Elf32_Sym sym, char *strtab, Elf32_Shdr *sections);
 int		sort_symbols_32(t_symbol_32 *symbols, int count);
 
 // skip_symbol_32.c
-int			skip_symbol_32(Elf32_Sym *sym);
+int			skip_symbol_32(Elf32_Sym *sym, const char *strtab);
 
 // get_symbol_letter_32.c
 char		get_symbol_letter_32(Elf32_Sym *sym, Elf32_Shdr *sections);

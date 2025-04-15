@@ -20,7 +20,7 @@ static void print_hex_padding(uint64_t value, int width)
 
 // Displays all 64-bit symbols in the standard nm output format.
 // Format: [hex address] [symbol type] [symbol name]
-// For undefined symbols (type 'U'), address is replaced by padding.
+// Addresses are not shown for undefined or weak-undefined symbols.
 int display_symbols_64(t_symbol_64 *symbols, int count)
 {
 	if (!symbols || count <= 0)
@@ -28,13 +28,13 @@ int display_symbols_64(t_symbol_64 *symbols, int count)
 
 	for (int i = 0; i < count; i++)
 	{
-		if (symbols[i].type != 'U')
-			print_hex_padding(symbols[i].sym.st_value, 16);
-		else
+		if (symbols[i].type == 'U' || symbols[i].type == 'w')
 		{
 			for (int j = 0; j < 16; j++)
 				ft_putchar_fd(' ', 1);
 		}
+		else
+			print_hex_padding(symbols[i].sym.st_value, 16);
 
 		ft_putchar_fd(' ', 1);
 		ft_putchar_fd(symbols[i].type, 1);
