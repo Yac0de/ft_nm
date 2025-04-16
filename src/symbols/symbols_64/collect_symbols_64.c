@@ -15,10 +15,15 @@ static t_symbol_64 *filter_and_build_symbols_64(t_symbol_build_ctx_64 *ctx, int 
 	int j = 0;
 	for (int i = 0; i < ctx->symbol_count; i++)
 	{
+		t_symbol_info_64 info = {
+			.sym = &ctx->symbols[i],
+			.strtab = ctx->strtab_data,
+			.sections = ctx->sections
+		};
+
 		// Filter out anonymous or unprintable symbols
-		if (!skip_symbol_64(&ctx->symbols[i], ctx->strtab_data) &&
-			ctx->strtab_data[ctx->symbols[i].st_name] != '\0')
-				list[j++] = build_symbol_64(ctx->symbols[i], ctx->strtab_data, ctx->sections);
+		if (!skip_symbol_64(&info) && ctx->strtab_data[ctx->symbols[i].st_name] != '\0')
+			list[j++] = build_symbol_64(&info);
 	}
 
 	*out_count = j; // Return the final count of valid symbols

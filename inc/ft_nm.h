@@ -40,6 +40,12 @@ typedef struct s_symbol_64 {
 	char		type;
 }	t_symbol_64;
 
+typedef struct s_symbol_info_64 {
+	Elf64_Sym *sym;
+	char *strtab;
+	Elf64_Shdr *sections;
+} t_symbol_info_64;
+
 typedef struct s_symbol_ctx_64 {
 	void        *map;
 	size_t      file_size;
@@ -55,7 +61,6 @@ typedef struct s_symbol_build_ctx_64
 	Elf64_Shdr *sections;
 } t_symbol_build_ctx_64;
 
-
 // ELF32
 typedef struct s_section_ctx_32 {
 	Elf32_Ehdr *ehdr;
@@ -69,6 +74,12 @@ typedef struct s_symbol_32 {
 	char		*name;
 	char		type;
 }	t_symbol_32;
+
+typedef struct s_symbol_info_32 {
+	Elf32_Sym *sym;
+	char *strtab;
+	Elf32_Shdr *sections;
+} t_symbol_info_32;
 
 typedef struct s_symbol_ctx_32 {
 	void		*map;
@@ -131,16 +142,16 @@ int		read_symbols_64(t_symbol_ctx_64 *ctx);
 t_symbol_64	*collect_symbols_64(t_symbol_ctx_64 *ctx , int *out_count);
 
 // symbol_builder_64.c
-t_symbol_64	build_symbol_64(Elf64_Sym sym, char *strtab, Elf64_Shdr *sections);
+t_symbol_64	build_symbol_64(t_symbol_info_64 *info);
 
 // sort_symbols_64.c
 int		sort_symbols_64(t_symbol_64 *symbols, int count);
 
 // skip_symbol_64.c
-int			skip_symbol_64(Elf64_Sym *sym, const char *strtab);
+int			skip_symbol_64(t_symbol_info_64 *info);
 
 // get_symbol_letter_64.c
-char		get_symbol_letter_64(Elf64_Sym *sym, Elf64_Shdr *sections);
+char		get_symbol_letter_64(t_symbol_info_64 *info);
 
 // display_symbols_64.c
 int		display_symbols_64(t_symbol_64 *symbols, int count);
@@ -155,16 +166,16 @@ int		read_symbols_32(t_symbol_ctx_32 *ctx);
 t_symbol_32	*collect_symbols_32(t_symbol_ctx_32 *ctx, int *out_count);
 
 // symbol_builder_32.c
-t_symbol_32	build_symbol_32(Elf32_Sym sym, char *strtab, Elf32_Shdr *sections);
+t_symbol_32	build_symbol_32(t_symbol_info_32 *info);
 
 // sort_symbols_32.c
 int		sort_symbols_32(t_symbol_32 *symbols, int count);
 
 // skip_symbol_32.c
-int			skip_symbol_32(Elf32_Sym *sym, const char *strtab);
+int			skip_symbol_32(t_symbol_info_32 *info);
 
 // get_symbol_letter_32.c
-char		get_symbol_letter_32(Elf32_Sym *sym, Elf32_Shdr *sections);
+char		get_symbol_letter_32(t_symbol_info_32 *info);
 
 // display_symbols_32.c
 int		display_symbols_32(t_symbol_32 *symbols, int count);

@@ -3,14 +3,14 @@
 // Maps an ELF32 symbol to its nm-style letter representation.
 // Determines the letter based on section type, flags, binding (local/global),
 // and handles special sections like .bss, .data, .rodata, .text, etc.
-char get_symbol_letter_32(Elf32_Sym *sym, Elf32_Shdr *sections)
+char get_symbol_letter_32(t_symbol_info_32 *info)
 {
-	if (!sym || !sections)
+	if (!info->sym || !info->sections)
 		return '?';
 
-	uint8_t bind = ELF32_ST_BIND(sym->st_info);
+	uint8_t bind = ELF32_ST_BIND(info->sym->st_info);
 	// uint8_t type = ELF32_ST_TYPE(sym->st_info);
-	Elf32_Half shndx = sym->st_shndx;
+	Elf32_Half shndx = info->sym->st_shndx;
 
 	if (bind == STB_WEAK)
 		return (shndx == SHN_UNDEF ? 'w' : 'W');
@@ -24,7 +24,7 @@ char get_symbol_letter_32(Elf32_Sym *sym, Elf32_Shdr *sections)
 	if (shndx >= SHN_LORESERVE)
 		return '?';
 
-	Elf32_Shdr section = sections[shndx];
+	Elf32_Shdr section = info->sections[shndx];
 	uint32_t flags = section.sh_flags;
 	uint32_t shtype = section.sh_type;
 
