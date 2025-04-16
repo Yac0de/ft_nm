@@ -1,7 +1,7 @@
 #include "../../inc/ft_nm.h"
 
 // Opens the file at the given path in read-only mode.
-// Returns the file descriptor, or -1 on failure (with perror).
+// Returns the file descriptor, or -1 on error (with perror).
 int open_file(const char *path)
 {
 	int fd = open(path, O_RDONLY);
@@ -19,8 +19,8 @@ int get_file_stat(int fd, struct stat *st)
 	return 0;
 }
 
-// Maps the file into memory using mmap with read-only access.
-// Returns a pointer to the mapped area, or MAP_FAILED on error (with perror).
+// Maps the file into memory with read-only access.
+// Returns a pointer to the mapped region, or MAP_FAILED on error (with perror).
 void *map_file(int fd, size_t size)
 {
 	void *map = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
@@ -30,7 +30,7 @@ void *map_file(int fd, size_t size)
 }
 
 // Unmaps a previously mapped file region.
-// Returns 0 on success, or -1 on failure.
+// Returns 0 on success, -1 on error.
 int unmap_file(t_file *file)
 {
 	return munmap(file->map, file->size);

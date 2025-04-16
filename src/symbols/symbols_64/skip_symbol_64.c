@@ -6,18 +6,18 @@
 int skip_symbol_64(t_symbol_info_64 *info)
 {
 	if (!info || !info->sym || !info->strtab)
-		return 1;
+		return 1; // Invalid context or corrupted symbol
 
 	uint8_t type = ELF64_ST_TYPE(info->sym->st_info);
 
-	// Skip symbols of type SECTION or FILE (internal use only)
+	// Ignore symbols representing a section or file (not real symbols)
 	if (type == STT_SECTION || type == STT_FILE)
 		return 1;
 
-	// Skip symbols with no name
+	// Ignore symbols without a name (anonymous or invalid entries)
 	if (info->sym->st_name == 0 || info->strtab[info->sym->st_name] == '\0')
 		return 1;
 
-	// Keep everything else, even STT_NOTYPE with a name (like __GNU_EH_FRAME_HDR)
+	// Otherwise, symbol is valid and should be kept
 	return 0;
 }

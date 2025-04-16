@@ -1,14 +1,14 @@
 #include "../../inc/ft_nm.h"
 
-// Displays usage help when incorrect arguments are passed.
-// Returns 1 for convenience in main().
+// Prints usage message to stderr when arguments are invalid.
+// Always returns 1 for convenience.
 int print_usage(void)
 {
 	return (ft_putstr_fd("Usage: ./ft_nm <elf_file>\n", 2), 1);
 }
 
-// Extracts the ELF class (32 or 64) from the file header.
-// Returns 32 or 64 on success, -1 on invalid value.
+// Returns ELF class (32 or 64) based on the ELF header.
+// Returns -1 if the class is invalid or unrecognized.
 int get_elf_class(void *map)
 {
 	unsigned char *ident = (unsigned char *)map;
@@ -20,7 +20,7 @@ int get_elf_class(void *map)
 	return -1;
 }
 
-// Verifies that the file starts with a valid ELF magic number.
+// Checks if the file begins with a valid ELF magic number.
 // Returns 1 if valid, 0 otherwise.
 int is_valid_elf(void *map)
 {

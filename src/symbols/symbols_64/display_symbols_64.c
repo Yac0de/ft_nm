@@ -1,7 +1,7 @@
 #include "../../../inc/ft_nm.h"
 
 // Prints a 64-bit value as zero-padded hexadecimal
-// Always prints exactly `width` characters.
+// Always prints exactly `width` character (typically 16 for 64-bit).
 static void print_hex_padding(uint64_t value, int width)
 {
 	char buffer[17];
@@ -20,7 +20,9 @@ static void print_hex_padding(uint64_t value, int width)
 
 // Displays all 64-bit symbols in the standard nm output format.
 // Format: [hex address] [symbol type] [symbol name]
-// Addresses are not shown for undefined or weak-undefined symbols.
+// Notes:
+// - Symbols of type 'U' (undefined) and 'w' (weak undefined) are shown without addresses.
+// - All other symbols have their virtual address printed on the left.
 int display_symbols_64(t_symbol_64 *symbols, int count)
 {
 	if (!symbols || count <= 0)
@@ -28,6 +30,7 @@ int display_symbols_64(t_symbol_64 *symbols, int count)
 
 	for (int i = 0; i < count; i++)
 	{
+		// If undefined or weak-undefined: print empty 16-character space
 		if (symbols[i].type == 'U' || symbols[i].type == 'w')
 		{
 			for (int j = 0; j < 16; j++)
@@ -36,6 +39,7 @@ int display_symbols_64(t_symbol_64 *symbols, int count)
 		else
 			print_hex_padding(symbols[i].sym.st_value, 16);
 
+		// Print: [space] [type letter] [space] [symbol name] \n
 		ft_putchar_fd(' ', 1);
 		ft_putchar_fd(symbols[i].type, 1);
 		ft_putchar_fd(' ', 1);

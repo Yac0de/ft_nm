@@ -1,8 +1,8 @@
 #include "../../../inc/ft_nm.h"
 
 // Constructs a t_symbol_64 from a symbol info context.
-// Fills in name and type (uppercase or lowercase depending on binding).
-// Returns '?' type if info is invalid or incomplete.
+// Fills in symbol name and type (uppercase or lowercase depending on binding).
+// Returns a symbol with type '?' if the input context is invalid.
 t_symbol_64 build_symbol_64(t_symbol_info_64 *info)
 {
 	t_symbol_64 symbol;
@@ -10,16 +10,20 @@ t_symbol_64 build_symbol_64(t_symbol_info_64 *info)
 	symbol.name = NULL;
 	symbol.type = '?';
 
+	// Safety check: ensure all required fields are present
 	if (!info || !info->sym || !info->strtab || !info->sections)
-	{
-		ft_putstr_fd("Error: NULL pointer in build_symbol_64\n", 2);
-		return symbol;
-	}
+		return(ft_putstr_fd("Error: NULL pointer in build_symbol_64\n", 2), symbol);
 
+	// Copy raw symbol structure
 	symbol.sym = *(info->sym);
+
+	// Resolve symbol name from the string table
 	symbol.name = info->strtab + info->sym->st_name;
+
+	// Determine nm-style symbol letter (e.g. T, U, B, etc.)
 	symbol.type = get_symbol_letter_64(info);
 
+	// Use lowercase for local (non-global) symbols, like `nm` does
 	if (ELF64_ST_BIND(info->sym->st_info) == STB_LOCAL)
 		symbol.type = ft_tolower(symbol.type);
 

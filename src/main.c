@@ -1,7 +1,7 @@
 #include "../inc/ft_nm.h"
 
-// Load an ELF file into memory using mmap.
-// On success, stores the mapped address in `*map` and the file size in `*size`.
+// Loads the given ELF file into memory using mmap.
+// On success, updates the file's `map` and `size` fields.
 static int	load_elf_file(t_file *file)
 {
 	int fd = open_file(file->name);
@@ -33,7 +33,7 @@ static int	load_elf_file(t_file *file)
 
 int	main(int argc, char **argv)
 {
-	// Expect exactly one argument: the ELF file to process
+	// Expect exactly one argument: the path to the ELF file
 	if (argc != 2)
 		return (print_usage());
 
@@ -47,10 +47,10 @@ int	main(int argc, char **argv)
 	if (!is_valid_elf(file.map))
 		return (unmap_file(&file), ft_putstr_fd("Not an ELF file\n", 2), 1);
 
-	// Parse and display symbols depending on ELF class (32/64)
+	// Handle ELF parsing and symbol display (32/64-bit)
 	int status = handle_elf_file(&file);
 
-	// Always unmap the file before exiting
+	// Clean up: unmap the file before exiting
 	unmap_file(&file);
 	return (status);
 }
