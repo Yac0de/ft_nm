@@ -21,6 +21,6 @@ int	handle_elf_file(t_file *file)
 		// Unknown or unsupported ELF class: fallback to nm-compatible error
 		ft_putstr_fd("nm: ", 2);
 		ft_putstr_fd((char *)file->name, 2);
-		return(ft_putstr_fd(": no symbols\n", 2), 1);
+		return (ft_putstr_fd(": file format not recognized\n", 2), 1);
 	}
 }
