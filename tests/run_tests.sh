@@ -5,7 +5,7 @@
 # and shared objects (.so). Output is compared to system nm.
 
 FT_NM=../ft_nm
-NM=nm
+NM="env LC_ALL=C nm" # Force binary string comparison for consistent sorting across locales
 SRC_DIR=src
 MALFORMED_DIR=malformed
 OBJ_DIR=obj
@@ -34,7 +34,7 @@ for src in "$SRC_DIR"/*; do
         obj64="$OBJ_DIR/${base}_64.o"
         gcc -c "$src" -o "$obj64" || { echo "Failed to compile $src (64-bit)"; continue; }
 
-        "$NM" "$obj64" > "$EXP_DIR/${base}_64.txt"
+        $NM "$obj64" > "$EXP_DIR/${base}_64.txt"
         "$FT_NM" "$obj64" > "$ACT_DIR/${base}_64.txt" 2>/dev/null
 
         if diff -u "$EXP_DIR/${base}_64.txt" "$ACT_DIR/${base}_64.txt" > /dev/null; then
@@ -47,7 +47,7 @@ for src in "$SRC_DIR"/*; do
         # === Compile 32-bit ===
         obj32="$OBJ_DIR/${base}_32.o"
         if gcc -m32 -c "$src" -o "$obj32" 2>/dev/null; then
-            "$NM" "$obj32" > "$EXP_DIR/${base}_32.txt"
+            $NM "$obj32" > "$EXP_DIR/${base}_32.txt"
             "$FT_NM" "$obj32" > "$ACT_DIR/${base}_32.txt" 2>/dev/null
 
             if diff -u "$EXP_DIR/${base}_32.txt" "$ACT_DIR/${base}_32.txt" > /dev/null; then
@@ -61,7 +61,7 @@ for src in "$SRC_DIR"/*; do
         fi
 
     elif [ "$ext" = "txt" ]; then
-        "$NM" "$src" 2>&1 | tee "$EXP_DIR/$base.txt" > /dev/null
+        $NM "$src" 2>&1 | tee "$EXP_DIR/$base.txt" > /dev/null
         "$FT_NM" "$src" 2>&1 | tee "$ACT_DIR/$base.txt" > /dev/null
 
         if diff -u "$EXP_DIR/$base.txt" "$ACT_DIR/$base.txt" > /dev/null; then
@@ -72,7 +72,7 @@ for src in "$SRC_DIR"/*; do
         fi
 
     elif [ "$ext" = "so" ]; then
-    "$NM" "$src" > "$EXP_DIR/$base.txt" 2>/dev/null
+    $NM "$src" > "$EXP_DIR/$base.txt" 2>/dev/null
     "$FT_NM" "$src" > "$ACT_DIR/$base.txt" 2>/dev/null
 
         if diff -u "$EXP_DIR/$base.txt" "$ACT_DIR/$base.txt" > /dev/null; then
@@ -83,7 +83,7 @@ for src in "$SRC_DIR"/*; do
         fi
 
     elif [ "$ext" = "o" ]; then
-        "$NM" "$src" > "$EXP_DIR/$base.txt" 2>/dev/null
+        $NM "$src" > "$EXP_DIR/$base.txt" 2>/dev/null
         "$FT_NM" "$src" > "$ACT_DIR/$base.txt" 2>/dev/null
 
         if diff -u "$EXP_DIR/$base.txt" "$ACT_DIR/$base.txt" > /dev/null; then
@@ -101,7 +101,7 @@ echo -e "\n====== Testing malformed ELF files ======\n"
 for bin in "$MALFORMED_DIR"/*; do
     name=$(basename "$bin")
 
-    "$NM" "$bin" 2>&1 | grep -v '^bfd plugin:' > "$EXP_DIR/$name.txt"
+    $NM "$bin" 2>&1 | grep -v '^bfd plugin:' > "$EXP_DIR/$name.txt"
     "$FT_NM" "$bin" > "$ACT_DIR/$name.txt" 2>&1
 
     if diff -u "$EXP_DIR/$name.txt" "$ACT_DIR/$name.txt" > /dev/null; then
